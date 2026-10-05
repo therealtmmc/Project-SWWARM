@@ -14,6 +14,10 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[Project SWWARM] Server listening on http://0.0.0.0:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[Project SWWARM] Server listening on http://0.0.0.0:${PORT}`);
+  });
+}
+
+export default app;
