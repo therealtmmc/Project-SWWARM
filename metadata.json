@@ -1,0 +1,8 @@
+{
+  "name": "Project SWWARM Master Portal",
+  "description": "Autonomous Ocean Platform Environmental & Telemetry Vessel Master Portal and Engineering Specification",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
