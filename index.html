@@ -7,6 +7,15 @@
 <meta name="description" content="Autonomous Ocean Platform Environmental & Telemetry Vessel Master Portal v3.6 Specification">
 <meta property="og:title" content="Project SWWARM Master Portal v3.6 SPEC">
 <meta property="og:description" content="Autonomous Ocean Platform Environmental & Telemetry Vessel Master Portal v3.6 Specification">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#070d19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SWWARM">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
@@ -897,6 +906,91 @@ function updateCostAnalytics() {
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
     });
   }
+}
+</script>
+
+<!-- PWA & Offline Access Script -->
+<div id="offline-toast" class="fixed bottom-4 left-4 z-50 hidden items-center gap-2.5 rounded-xl bg-slate-900/95 border border-amber-500/50 px-4 py-2.5 text-xs font-medium text-amber-300 shadow-2xl backdrop-blur-md">
+  <span class="relative flex h-2.5 w-2.5">
+    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+  </span>
+  <span>Offline Mode Active — Using cached specification data</span>
+</div>
+
+<div id="pwa-install-banner" class="fixed bottom-4 right-4 z-50 hidden items-center gap-3 rounded-xl bg-slate-900/95 border border-cyan-500/50 p-3 shadow-2xl backdrop-blur-md">
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+      <i data-lucide="download" class="w-4 h-4"></i>
+    </div>
+    <div class="text-xs">
+      <div class="font-bold text-white">Install SWWARM App</div>
+      <div class="text-slate-400 text-[10px]">Access offline anytime</div>
+    </div>
+  </div>
+  <button id="pwa-install-btn" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-lg transition-colors">Install</button>
+  <button id="pwa-close-btn" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+</div>
+
+<script>
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((reg) => console.log('[SWWARM PWA] ServiceWorker registered with scope:', reg.scope))
+      .catch((err) => console.warn('[SWWARM PWA] ServiceWorker registration failed:', err));
+  });
+}
+
+// Offline Status Indicator
+function updateOnlineStatus() {
+  const offlineToast = document.getElementById('offline-toast');
+  if (offlineToast) {
+    if (!navigator.onLine) {
+      offlineToast.classList.remove('hidden');
+      offlineToast.classList.add('flex');
+    } else {
+      offlineToast.classList.add('hidden');
+      offlineToast.classList.remove('flex');
+    }
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// PWA Install Prompt handling
+let deferredPrompt = null;
+const installBanner = document.getElementById('pwa-install-banner');
+const installBtn = document.getElementById('pwa-install-btn');
+const closeBtn = document.getElementById('pwa-close-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBanner && !window.matchMedia('(display-mode: standalone)').matches) {
+    installBanner.classList.remove('hidden');
+    installBanner.classList.add('flex');
+    if (window.lucide) lucide.createIcons();
+  }
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      if (installBanner) installBanner.classList.add('hidden');
+    }
+    deferredPrompt = null;
+  });
+}
+
+if (closeBtn) {
+  closeBtn.addEventListener('click', () => {
+    if (installBanner) installBanner.classList.add('hidden');
+  });
 }
 </script>
 
