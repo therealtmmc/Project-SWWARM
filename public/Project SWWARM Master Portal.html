@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Project SWWARM Master Portal v3.6 SPEC</title>
+<meta name="description" content="Autonomous Ocean Platform Environmental & Telemetry Vessel Master Portal v3.6 Specification">
+<meta property="og:title" content="Project SWWARM Master Portal v3.6 SPEC">
+<meta property="og:description" content="Autonomous Ocean Platform Environmental & Telemetry Vessel Master Portal v3.6 Specification">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#070d19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SWWARM">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Outfit', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      }
+    }
+  }
+}
+</script>
+<style>
+/* Layout: single-column engineering portal. Sticky header, hero
+metrics, simulator, topology, BOM table, materials, cost analytics.
+Deliberately one dark look (deep-sea instrument panel). */
+:root {
+  --bg: #070d19;
+  --fg: #f8fafc;
+  --panel: rgba(15, 23, 42, 0.75);
+  --panel-line: rgba(51, 65, 85, 0.5);
+  --accent: #06b6d4;
+  --track: #0f172a;
+  --thumb: #334155;
+  color-scheme: dark;
+}
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+.glass-panel {
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-line);
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--track); }
+::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+#component-modal { display: none; }
+#component-modal.open { display: flex; }
+td, th { font-variant-numeric: tabular-nums; }
+.ref-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(12, 74, 110, .5);
+  border: 1px solid rgba(3, 105, 161, .6);
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-ping { animation: none; }
+}
+</style>
+</head>
+<body style="padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)">
+
+<div class="min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky z-40 w-full glass-panel border-b border-slate-800" style="top: env(safe-area-inset-top, 0px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="p-2 bg-gradient-to-tr from-cyan-500 to-teal-400 rounded-xl text-slate-950 font-bold shadow-lg shadow-cyan-500/20 shrink-0">
+          <i data-lucide="anchor" class="w-6 h-6"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-lg font-bold text-white tracking-wide flex items-center gap-2">
+            <span class="truncate">PROJECT SWWARM MASTER PORTAL</span>
+            <span class="hidden sm:inline text-xs font-mono font-normal px-2 py-0.5 bg-cyan-950 text-cyan-400 border border-cyan-800 rounded-full">v3.6 SPEC</span>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Autonomous Ocean Platform • Environmental &amp; Telemetry Vessel</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-slate-300">AUTONOMY READY</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 min-w-0">
+
+    <!-- Hero -->
+    <section class="glass-panel p-5 sm:p-8 rounded-2xl relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-900/90 to-cyan-950/40">
+      <div class="absolute -right-10 -bottom-10 opacity-10 text-cyan-400 pointer-events-none">
+        <i data-lucide="waves" class="w-96 h-96"></i>
+      </div>
+      <div class="relative z-10 max-w-3xl space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+          TECHNICAL MASTER PROJECT SPECIFICATION
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white" style="text-wrap: balance;">
+          All-In-One Autonomous Ocean Platform
+        </h2>
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+          Comprehensive engineering architecture, material selection, tri-hybrid renewable energy budget, sensor suite payload, and complete Bill of Materials (BOM) cost matrix.
+        </p>
+      </div>
+
+      <div class="relative z-10 mt-8 grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 min-w-0">
+          <div class="text-slate-400 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i> Modeled Power Gen
+          </div>
+          <div class="text-lg sm:text-xl font-bold font-mono text-emerald-400 mt-1">+145.95 W</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">3,502.8 Wh/d Modeled Output [SIM] <span class="ref-tag">[REF-01]</span></div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 min-w-0">
+          <div class="text-slate-400 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i> Baseline Load
+          </div>
+          <div class="text-lg sm:text-xl font-bold font-mono text-cyan-400 mt-1">13.3 W</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">+132.65 W Modeled Surplus [CALC]</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 min-w-0">
+          <div class="text-slate-400 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="battery-charging" class="w-4 h-4 text-amber-400"></i> Battery Bank
+          </div>
+          <div class="text-lg sm:text-xl font-bold font-mono text-amber-400 mt-1">4,896 Wh</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">48V nominal • ~102Ah (~4,178 Wh Usable) <span class="ref-tag">[REF-02]</span></div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 min-w-0">
+          <div class="text-slate-400 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="dollar-sign" class="w-4 h-4 text-sky-400"></i> Total BOM Cost
+          </div>
+          <div class="text-lg sm:text-xl font-bold font-mono text-sky-400 mt-1">$18,850</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">20 Components</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 col-span-2 md:col-span-1 min-w-0">
+          <div class="text-slate-400 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="box" class="w-4 h-4 text-indigo-400"></i> Envelope / Mass
+          </div>
+          <div class="text-lg sm:text-xl font-bold font-mono text-indigo-300 mt-1">1.8m³ • 251.6kg</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">CFRP/GRP Dual Enclosure <span class="ref-tag">[REF-06]</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hourly Simulation Statistics -->
+    <section class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="activity" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+          Hourly Simulation Statistics Across Environmental Scenarios
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Hourly power generation, consumption, net energy balance and battery State-of-Charge (SoC) impact across environmental and operational conditions. Environmental yields are simulation assumptions; battery SoC uses 4,896 Wh nominal capacity. [SIM/CALC] <span class="ref-tag">[REF-02]</span>.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
+        <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 min-w-0">
+          <div class="text-slate-500 text-[10px] uppercase tracking-wider mb-1">Net hourly balance</div>
+          <div class="text-slate-200 break-words">E<sub>net</sub> = E<sub>solar</sub> + E<sub>wind</sub> + E<sub>wave</sub> − E<sub>load</sub></div>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 min-w-0">
+          <div class="text-slate-500 text-[10px] uppercase tracking-wider mb-1">Hourly SoC change [CALC] <span class="ref-tag">[REF-02]</span></div>
+          <div class="text-slate-200 break-words">ΔSoC = E<sub>net</sub> ÷ 4,896 Wh × 100%</div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-800">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/90 text-slate-400 font-mono uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <tr>
+              <th class="py-3 px-4">Operational Scenario &amp; Weather Condition</th>
+              <th class="py-3 px-4">Solar Yield (E<sub>solar</sub>) <span class="ref-tag">[REF-01]</span></th>
+              <th class="py-3 px-4">Wind Yield (E<sub>wind</sub>)</th>
+              <th class="py-3 px-4">Wave Yield (E<sub>wave</sub>)</th>
+              <th class="py-3 px-4">Operating Mode (E<sub>load</sub>)</th>
+              <th class="py-3 px-4">Net Hourly Balance (E<sub>net</sub>)</th>
+              <th class="py-3 px-4">Hourly Battery SoC Change <span class="ref-tag">[REF-02]</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">1.</span><span class="font-bold text-slate-200">Midday Peak Sun &amp; Trade Winds</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-amber-400 border-amber-900 bg-amber-950/40 whitespace-nowrap">Active Sampling</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">255.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">50.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">48.1 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Sampling (110.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+242.8 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+4.96% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">2.</span><span class="font-bold text-slate-200">Midday Peak Sun &amp; Trade Winds</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-cyan-400 border-cyan-900 bg-cyan-950/40 whitespace-nowrap">Baseline Keep</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">255.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">50.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">48.1 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Baseline (13.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+339.8 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+6.94% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">3.</span><span class="font-bold text-slate-200">Nominal Night with Trade Winds</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-cyan-400 border-cyan-900 bg-cyan-950/40 whitespace-nowrap">Baseline Keep</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">50.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">48.1 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Baseline (13.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+84.8 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+1.73% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">4.</span><span class="font-bold text-slate-200">Overcast Day &amp; Light Breeze</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-amber-400 border-amber-900 bg-amber-950/40 whitespace-nowrap">Active Sampling</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">102.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">20.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">48.1 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Sampling (110.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+59.8 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+1.22% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">5.</span><span class="font-bold text-slate-200">Severe Typhoon Night</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-rose-400 border-rose-900 bg-rose-950/40 whitespace-nowrap">Emergency Survival</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">160.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">80.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Survival (6.0 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+234.0 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+4.78% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">6.</span><span class="font-bold text-slate-200">Severe Typhoon Night</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-amber-400 border-amber-900 bg-amber-950/40 whitespace-nowrap">Active Sampling</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">160.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">80.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Sampling (110.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+129.7 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-emerald-400">+2.65% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">7.</span><span class="font-bold text-slate-200">Nighttime Doldrums / Glassy Sea</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-amber-400 border-amber-900 bg-amber-950/40 whitespace-nowrap">Active Sampling</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">5.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Sampling (110.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-rose-400">-105.3 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-rose-400">-2.15% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">8.</span><span class="font-bold text-slate-200">Nighttime Doldrums / Glassy Sea</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-cyan-400 border-cyan-900 bg-cyan-950/40 whitespace-nowrap">Baseline Keep</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">5.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Baseline (13.3 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-rose-400">-8.3 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-rose-400">-0.17% / hr</td>
+            </tr>
+            <tr class="border-b border-slate-800/40 hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 min-w-[15rem]"><span class="font-mono text-slate-500 mr-2">9.</span><span class="font-bold text-slate-200">Total Environmental Lull</span> <span class="block sm:inline ml-0 sm:ml-1 px-2 py-0.5 rounded text-[10px] font-mono border text-rose-400 border-rose-900 bg-rose-950/40 whitespace-nowrap">Emergency Survival</span></td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-amber-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-cyan-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-teal-300">0.0 Wh/hr*</td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap text-slate-300">Survival (6.0 Wh/hr)</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-rose-400">-6.0 Wh/hr</td>
+              <td class="py-3 px-4 font-mono font-bold whitespace-nowrap text-rose-400">-0.12% / hr</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="p-2.5 bg-slate-950 text-[10px] text-slate-500 font-mono border-t border-slate-800">
+          * Environmental generation values are simulation assumptions, not manufacturer ratings. [SIM]
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Key Operational Simulation Behavior</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 min-w-0">
+            <div class="text-xs font-mono font-bold text-emerald-400 uppercase">Scenario 5</div>
+            <h4 class="font-bold text-sm text-white">Tri-Hybrid Storm Scenario [SIMULATION]</h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed">During severe-weather simulation, solar output is set to zero while wind and wave generation are modeled at 160 W and 80 Wh/hr respectively. In Emergency Survival Mode, the modeled net balance is +234.0 Wh/hr. These environmental-generation values are assumptions and require turbine/wave-converter power curves and metocean validation. <span class="ref-tag">[REF-02]</span></p>
+          </div>
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 min-w-0">
+            <div class="text-xs font-mono font-bold text-amber-400 uppercase">Scenario 4</div>
+            <h4 class="font-bold text-sm text-white">Overcast Resiliency [SIMULATION]</h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed">Under the current overcast simulation, solar yield is modeled at 102 Wh/hr (40% of the 255 Wh/hr scenario input). Combined with modeled low-wind and wave inputs, the net balance is +59.8 Wh/hr. This is a simulation assumption, not a panel datasheet output. <span class="ref-tag">[REF-01]</span></p>
+          </div>
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 min-w-0">
+            <div class="text-xs font-mono font-bold text-rose-400 uppercase">Scenarios 7 - 9</div>
+            <h4 class="font-bold text-sm text-white">Doldrums Discharge Rates</h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed">With zero wind and a glassy sea at night, the 4,178 Wh usable design capacity is modeled to last: <span class="ref-tag">[REF-02]</span></p>
+            <ul class="text-[11px] text-slate-300 leading-relaxed space-y-1 font-mono">
+              <li>Active Sampling: 39.7 hours</li>
+              <li>Baseline Mode: 503.4 hours (21.0 days)</li>
+              <li>Emergency Survival: 696.3 hours (29.0 days)</li>
+            </ul>
+            <div class="text-[10px] text-slate-500 font-mono mt-2 pt-2 border-t border-slate-800/80">
+              Duration calculations use the project's 4,178 Wh usable-energy design assumption. [CALC]
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Topology -->
+    <section class="glass-panel p-4 sm:p-6 rounded-2xl space-y-4">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="network" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+          Platform Architectural System Topology
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Integrated power harvesting, 48V DC bus regulation, central compute, and sub-surface sensor routing.</p>
+      </div>
+
+      <div class="w-full overflow-x-auto bg-slate-950 p-4 sm:p-6 rounded-xl border border-slate-800">
+        <svg viewBox="0 0 900 380" class="w-full min-w-[750px] text-xs font-mono" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Power flows from solar, wind and wave harvesters through a 48V ideal diode bus into the LiFePO4 battery bank, which feeds the MCU and satcom unit and the sensor and remediation unit.">
+          <path d="M 170 60 L 280 180" stroke="#10b981" stroke-width="2" stroke-dasharray="4 2" />
+          <path d="M 170 180 L 280 180" stroke="#06b6d4" stroke-width="2" stroke-dasharray="4 2" />
+          <path d="M 170 300 L 280 180" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 2" />
+          <path d="M 440 180 L 510 180" stroke="#38bdf8" stroke-width="3" />
+          <path d="M 640 180 L 710 100" stroke="#38bdf8" stroke-width="2" />
+          <path d="M 640 180 L 710 260" stroke="#38bdf8" stroke-width="2" />
+          <path d="M 710 260 L 800 260" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="3 3" />
+          <path d="M 800 100 L 800 260" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="3 3" />
+
+          <g transform="translate(20, 20)">
+            <rect width="150" height="80" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+            <text x="15" y="28" fill="#10b981" font-weight="bold" font-size="12">SOLAR DECK</text>
+            <text x="15" y="44" fill="#94a3b8" font-size="9.5">390-400W Maxeon 3</text>
+            <text x="15" y="58" fill="#64748b" font-size="8.5">~22.1-22.6% Module Eff.</text>
+            <text x="15" y="72" fill="#38bdf8" font-size="9">[REF-01]</text>
+          </g>
+          <g transform="translate(20, 140)">
+            <rect width="150" height="80" rx="10" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5"/>
+            <text x="15" y="30" fill="#06b6d4" font-weight="bold" font-size="12">WIND TURBINE</text>
+            <text x="15" y="48" fill="#94a3b8" font-size="10">200W Helical VAWT</text>
+            <text x="15" y="64" fill="#64748b" font-size="9">PMSG + Active Rectifier</text>
+          </g>
+          <g transform="translate(20, 260)">
+            <rect width="150" height="80" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="15" y="30" fill="#f59e0b" font-weight="bold" font-size="12">WAVE ABSORBER</text>
+            <text x="15" y="48" fill="#94a3b8" font-size="10">100W Hydraulic Rams</text>
+            <text x="15" y="64" fill="#64748b" font-size="9">Continuous Swell Gen</text>
+          </g>
+          <g transform="translate(280, 130)">
+            <rect width="160" height="100" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+            <text x="15" y="30" fill="#38bdf8" font-weight="bold" font-size="12">48V IDEAL DIODE BUS</text>
+            <text x="15" y="50" fill="#cbd5e1" font-size="10">• Active MOSFET Diode</text>
+            <text x="15" y="66" fill="#cbd5e1" font-size="10">• &gt;98.5% Conversion Eff.</text>
+            <text x="15" y="82" fill="#94a3b8" font-size="9">Zero Reverse Current</text>
+          </g>
+          <g transform="translate(510, 130)">
+            <rect width="130" height="100" rx="12" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+            <text x="15" y="26" fill="#10b981" font-weight="bold" font-size="11">LiFePO4 BANK</text>
+            <text x="15" y="42" fill="#cbd5e1" font-size="9">48V ~102Ah (~4.896 kWh)</text>
+            <text x="15" y="56" fill="#cbd5e1" font-size="9">15S1P EVE LF100LA</text>
+            <text x="15" y="70" fill="#94a3b8" font-size="9">~4,178 Wh Usable</text>
+            <text x="15" y="86" fill="#38bdf8" font-size="9">[REF-02]</text>
+          </g>
+          <g transform="translate(710, 50)">
+            <rect width="170" height="90" rx="10" fill="#0f172a" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="12" y="25" fill="#a855f7" font-weight="bold" font-size="11">MCU &amp; SATCOM</text>
+            <text x="12" y="42" fill="#94a3b8" font-size="9">• ARM M7 Industrial Controller</text>
+            <text x="12" y="56" fill="#94a3b8" font-size="9">• Starlink Mini <tspan fill="#38bdf8">[REF-03]</tspan></text>
+            <text x="12" y="70" fill="#94a3b8" font-size="9">• Iridium SBD <tspan fill="#38bdf8">[REF-07]</tspan></text>
+          </g>
+          <g transform="translate(710, 210)">
+            <rect width="170" height="125" rx="10" fill="#0f172a" stroke="#ec4899" stroke-width="1.5"/>
+            <text x="12" y="25" fill="#ec4899" font-weight="bold" font-size="11">SENSORS &amp; REMEDIATION</text>
+            <text x="12" y="42" fill="#94a3b8" font-size="9">• Durafet pH <tspan fill="#38bdf8">[REF-04]</tspan></text>
+            <text x="12" y="56" fill="#94a3b8" font-size="9">• YSI EXO DO <tspan fill="#38bdf8">[REF-05]</tspan></text>
+            <text x="12" y="70" fill="#94a3b8" font-size="9">• Sony NPU <tspan fill="#38bdf8">[REF-08]</tspan></text>
+            <text x="12" y="84" fill="#94a3b8" font-size="9">• Hydrophone, Venturi Aeration</text>
+            <text x="12" y="98" fill="#94a3b8" font-size="9">• Ultrasonic Anemometer</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- BOM -->
+    <section class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6" id="bom-section">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="database" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+            Master Component Specification &amp; BOM Matrix
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Filterable engineering breakdown of all 20 integrated machinery, sensors, structural, and power subsystems.</p>
+        </div>
+
+        <div class="relative max-w-xs w-full">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
+          <label for="bom-search" class="sr-only">Search components</label>
+          <input type="text" id="bom-search" oninput="filterBOMTable()" placeholder="Search material, component, spec..." class="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-cyan-500 transition">
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 text-xs" id="filter-pills">
+        <button type="button" data-sub="ALL" onclick="filterSubsystem('ALL')" class="pill-btn px-3 py-1 rounded-lg bg-cyan-600 text-slate-950 font-semibold transition">All (20)</button>
+        <button type="button" data-sub="Structural Hull" onclick="filterSubsystem('Structural Hull')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Structural Hull</button>
+        <button type="button" data-sub="Power Generation" onclick="filterSubsystem('Power Generation')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Power Generation</button>
+        <button type="button" data-sub="Power Mgmt &amp; Storage" onclick="filterSubsystem('Power Mgmt &amp; Storage')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Power Mgmt &amp; Storage</button>
+        <button type="button" data-sub="Atmospheric Sensors" onclick="filterSubsystem('Atmospheric Sensors')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Atmospheric Sensors</button>
+        <button type="button" data-sub="Sub-Surface Probes" onclick="filterSubsystem('Sub-Surface Probes')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Sub-Surface Probes</button>
+        <button type="button" data-sub="Communications &amp; Computing" onclick="filterSubsystem('Communications &amp; Computing')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Comms &amp; Computing</button>
+        <button type="button" data-sub="Bio-Remediation" onclick="filterSubsystem('Bio-Remediation')" class="pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition">Bio-Remediation</button>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-800">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/90 text-slate-400 font-mono uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <tr>
+              <th class="py-3 px-4">Component &amp; Machine Name</th>
+              <th class="py-3 px-4">Subsystem</th>
+              <th class="py-3 px-4">Material &amp; Specs</th>
+              <th class="py-3 px-4">Size &amp; Mass</th>
+              <th class="py-3 px-4">Operating Bus</th>
+              <th class="py-3 px-4">Efficiency/Rating</th>
+              <th class="py-3 px-4">Power (W)</th>
+              <th class="py-3 px-4">Yield / Draw</th>
+              <th class="py-3 px-4">Est. Cost</th>
+              <th class="py-3 px-4 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="bom-table-body" class="divide-y divide-slate-800/60 font-sans"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Materials -->
+    <section class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6">
+      <div class="border-b border-slate-800 pb-3">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="layers" class="w-5 h-5 text-teal-400 shrink-0"></i>
+          Material Science &amp; Structural Metallurgy Specifications
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">High-performance marine materials selected for extreme fatigue strength, zero bio-fouling, and RF transparency.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 hover:border-cyan-500/40 transition min-w-0">
+          <div class="text-xs font-mono font-bold text-cyan-400 uppercase">Hull Matrix <span class="ref-tag">[REF-06]</span></div>
+          <h3 class="font-bold text-sm text-white">Vacuum CFRP (Torayca)</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Torayca T700S/T800S Carbon Fiber with marine epoxy. T700S fiber tensile strength is 4.9 GPa; T800S fiber tensile strength is approximately 5.88 GPa. These are fiber properties, not finished laminate strength.</p>
+        </div>
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 hover:border-teal-500/40 transition min-w-0">
+          <div class="text-xs font-mono font-bold text-teal-400 uppercase">Dome Canopy</div>
+          <h3 class="font-bold text-sm text-white">E-Glass GRP</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Isophthalic glass-reinforced plastic canopy providing 100% RF transparency for Starlink satellite antennas while shielding internal optics.</p>
+        </div>
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 hover:border-amber-500/40 transition min-w-0">
+          <div class="text-xs font-mono font-bold text-amber-400 uppercase">Fasteners</div>
+          <h3 class="font-bold text-sm text-white">Titanium Ti-6Al-4V</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Grade 5 titanium hardware paired with PTFE isolation bushings to eliminate galvanic potential across carbon-metal sub-surface junctions.</p>
+        </div>
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 hover:border-sky-500/40 transition min-w-0">
+          <div class="text-xs font-mono font-bold text-sky-400 uppercase">Solar Deck <span class="ref-tag">[REF-01]</span></div>
+          <h3 class="font-bold text-sm text-white">ETFE Monocrystalline</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">SunPower Maxeon 3 family: 390–400 W module options and approximately 22.1–22.6% efficiency, depending on model. Environmental hourly yield remains a simulation assumption.</p>
+        </div>
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 hover:border-indigo-500/40 transition min-w-0 sm:col-span-2 lg:col-span-1">
+          <div class="text-xs font-mono font-bold text-indigo-400 uppercase">Anti-Fouling</div>
+          <h3 class="font-bold text-sm text-white">Sharkskin Silicone</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Copper-free biomimetic micro-placoid texture preventing barnacle cyprid settlement mechanically without toxic heavy metal leaching.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cost Analytics -->
+    <section class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6">
+      <div class="border-b border-slate-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="chart-pie" class="w-5 h-5 text-sky-400 shrink-0"></i>
+            Financial Analytics &amp; Fleet Spares Estimator
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Cost allocation per subsystem and customizable fleet procurement multiplier.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <label for="spares-multiplier" class="text-slate-400">Fleet Quantity / Spares Buffer:</label>
+          <select id="spares-multiplier" onchange="updateCostAnalytics()" class="bg-slate-900 border border-slate-800 text-cyan-400 py-1 px-2.5 rounded-lg">
+            <option value="1">1 Unit (Single Platform)</option>
+            <option value="1.1">1 Unit + 10% Spares Buffer</option>
+            <option value="3">3 Units (Coastal Array)</option>
+            <option value="5">5 Units (Ocean Fleet)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex flex-col items-center justify-center min-w-0">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 w-full text-left">Subsystem Cost Breakdown (%)</h3>
+          <div class="relative h-56 w-56 max-w-full">
+            <canvas id="costDonutChart"></canvas>
+          </div>
+        </div>
+
+        <div class="lg:col-span-2 bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3 min-w-0">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Procurement Summary per Category</h3>
+          <div class="space-y-2.5 text-xs font-mono" id="subsystem-cost-list"></div>
+          <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex flex-wrap justify-between items-center gap-2 text-sm font-bold mt-4">
+            <span class="text-white">Estimated Grand Total (USD):</span>
+            <span id="grand-total-cost" class="text-cyan-400 font-mono text-lg">$18,850.00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engineering References & Direct Datasheets -->
+    <section class="glass-panel p-4 sm:p-6 rounded-2xl space-y-6">
+      <div class="border-b border-slate-800 pb-3">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+          Engineering References &amp; Direct Datasheets
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Direct PDF specification sheets, engineering manuals, and official technology portals benchmarking system statistics.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+        <!-- REF-01 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-01] Photovoltaic Subsystem</span>
+              <span>SunPower / Maxeon</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">SunPower Maxeon 3 Series Solar Panel Datasheet</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">Maxeon 3 family: 390–400 W module options; approximately 22.1–22.6% efficiency depending on model. Use project hourly solar yields only as simulation assumptions.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80">
+            <a href="https://www.energyaustralia.com.au/sites/default/files/2023-07/Sunpower_MAX3_datasheet.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View SunPower MAX3 Datasheet (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-02 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-02] Energy Storage Subsystem</span>
+              <span>EVE Energy Co., Ltd.</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">EVE LF100LA 3.2V 100Ah LiFePO4 Cell Datasheet</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">EVE LF100LA: 3.2 V nominal, 102 Ah rated capacity, 326.4 Wh per cell. A 15S1P configuration gives 48 V nominal and ~4.896 kWh nominal. 5,000-cycle rating under the manufacturer's stated test conditions.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80">
+            <a href="https://ezealco.com/wp-content/uploads/2023/07/RD-LF100LA-S01-LF100Ah-Datasheet.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View EVE LF100LA Cell Datasheet (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-03 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-03] Satellite Broadband Subsystem</span>
+              <span>SpaceX / Starlink</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">Starlink Mini Phased Array Terminal Specification</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">Starlink Mini: 25–40 W average power consumption; 12–48 V, 60 W input rating. Use 25–40 W for energy budgeting, not 25 W as a fixed active draw.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80">
+            <a href="https://starlink.com/public-files/specification_sheet_mini.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View Starlink Mini Specification Sheet (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-04 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-04] Water Chemistry Probe Subsystem</span>
+              <span>Honeywell Process Solutions</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">Honeywell Durafet ISFET Solid-State pH Sensor Specification</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">Honeywell Durafet ISFET pH sensor: supports ISFET sensor technology and operating characteristics for solid-state non-glass pH sensing in marine environments.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80">
+            <a href="https://prod-edam.honeywell.com/content/dam/honeywell-edam/pmt/hps/products/pmc/process-instruments/analytical-instruments&amp;sensors/ph-orp-sensors/durafet-ph-sensor/pmt-hps-70-83-58-01.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View Honeywell Durafet Specification (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-05 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-05] Telemetry &amp; Optical Sensor Array</span>
+              <span>YSI / Xylem</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">YSI EXO Sondes and Smart Sensors User Manual</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">YSI EXO: multiparameter sonde platform. Relevant EXO turbidity sensor range is 0–4000 FNU; optical dissolved oxygen is available as an EXO Smart Sensor.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80">
+            <a href="https://www.ysi.com/file%20library/documents/manuals/exo-user-manual-web.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View YSI EXO User Manual (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-06 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-06] Composite Structural Hull Subsystem</span>
+              <span>Toray Composite Materials</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">Torayca T700S &amp; T800S Carbon Fiber Technical Data Sheets</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">Torayca T700S &amp; T800S: T700S fiber tensile strength 4.9 GPa; T800S fiber tensile strength approximately 5.88 GPa. Do not equate fiber strength with finished CFRP laminate strength.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 flex items-center gap-3">
+            <a href="https://toray-cfe.com/wp-content/uploads/2025/02/Torayca-T700S-Technical-Data-Sheet.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> T700S TDS (PDF)
+            </a>
+            <span class="text-slate-600">•</span>
+            <a href="https://toray-cfe.com/wp-content/uploads/2025/02/Torayca-T800S-Technical-Data-Sheet.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> T800S TDS (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-07 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-07] Global Low-Band Telemetry Subsystem</span>
+              <span>Iridium Communications</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">Iridium 9603 / 9603N SBD Transceiver Developer's Guide</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">Iridium 9603/9603N: 5 V supply; 1.3 A peak TX current; ~0.8 W average power during SBD message transfer.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80">
+            <a href="https://telemetry.groupcls.com/wp-content/uploads/2018/12/Iridium-9603-9603N_Developers-Guide.pdf?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View Iridium 9603 Developer Guide (PDF)
+            </a>
+          </div>
+        </div>
+
+        <!-- REF-08 -->
+        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 flex flex-col justify-between">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-cyan-400 font-bold uppercase">
+              <span>[REF-08] Sub-Surface Vision &amp; AI Subsystem</span>
+              <span>Sony Semiconductor Solutions</span>
+            </div>
+            <h3 class="font-sans font-bold text-slate-200 text-sm">Sony Security Sensing &amp; Intelligent Vision Sensors Portals</h3>
+            <p class="text-slate-400 text-[11px] font-sans leading-relaxed">Sony Security / Intelligent Vision: STARVIS-family high-sensitivity, low-light imaging and integrated edge-AI processing portals.</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 flex items-center gap-3">
+            <a href="https://www.sony-semicon.com/en/technology/security/index.html?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Sony Security Tech
+            </a>
+            <span class="text-slate-600">•</span>
+            <a href="https://www.sony-semicon.com/en/technology/ivs/index.html?hl=en-PH" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:underline transition">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Sony Edge AI Tech
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800 py-6 px-4 text-center text-xs text-slate-500">
+    <p>All-In-One Autonomous Ocean Platform • Marine Ecosystem Restoration &amp; Telemetry Portal</p>
+  </footer>
+</div>
+
+<!-- Component Detail Modal -->
+<div id="component-modal" class="fixed inset-0 z-50 items-center justify-center p-4 bg-slate-950/80" style="backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);" onclick="if(event.target===this) closeModal()">
+  <div class="glass-panel w-full max-w-2xl max-h-full overflow-y-auto rounded-2xl border border-slate-700 shadow-2xl p-5 sm:p-6 space-y-5 relative" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button type="button" onclick="closeModal()" aria-label="Close" class="absolute top-4 right-4 p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+
+    <div class="space-y-1 pr-8">
+      <span id="modal-subsystem" class="text-xs font-mono font-bold text-cyan-400 uppercase">SUBSYSTEM</span>
+      <h2 id="modal-title" class="text-xl font-bold text-white">Component Name</h2>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-slate-900/80 p-4 rounded-xl border border-slate-800 font-mono">
+      <div class="min-w-0"><span class="text-slate-500 block text-[10px]">OPERATING BUS</span><span id="modal-bus" class="text-slate-200 font-bold">-</span></div>
+      <div class="min-w-0"><span class="text-slate-500 block text-[10px]">PHYSICAL SIZE &amp; MASS</span><span id="modal-size" class="text-slate-200 font-bold">-</span></div>
+      <div class="min-w-0"><span class="text-slate-500 block text-[10px]">EFFICIENCY / RATING</span><span id="modal-efficiency" class="text-teal-400 font-bold">-</span></div>
+      <div class="min-w-0"><span class="text-slate-500 block text-[10px]">POWER RATING (W)</span><span id="modal-power" class="text-amber-400 font-bold">-</span></div>
+      <div class="min-w-0"><span class="text-slate-500 block text-[10px]">DAILY ENERGY YIELD/DRAW</span><span id="modal-yield" class="text-cyan-400 font-bold">-</span></div>
+      <div class="min-w-0"><span class="text-slate-500 block text-[10px]">ESTIMATED UNIT COST</span><span id="modal-cost" class="text-sky-400 font-bold">-</span></div>
+    </div>
+
+    <div class="space-y-3 text-xs">
+      <div>
+        <h4 class="font-bold text-slate-300 uppercase tracking-wider text-[10px] mb-1">Real-World Material Composition</h4>
+        <p id="modal-material" class="p-3 bg-slate-900 rounded-lg text-slate-300 border border-slate-800 leading-relaxed font-mono">-</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-slate-300 uppercase tracking-wider text-[10px] mb-1">Operational Role &amp; Engineering Function</h4>
+        <p id="modal-role" class="p-3 bg-slate-900 rounded-lg text-slate-300 border border-slate-800 leading-relaxed">-</p>
+      </div>
+    </div>
+
+    <div class="pt-2 flex justify-end">
+      <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">Close Specification</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const bomComponents = [
+{ id: 1, name: "Vacuum-Infused Epoxy CFRP Main Hull (Torayca)", subsystem: "Structural Hull", material: "Torayca T700S/T800S Carbon Fiber / Epoxy Matrix", size: "1.8m x 1.8m x 0.8m | 42.0 kg", bus: "Passive Frame", efficiency: "T700S 4.9 GPa / T800S 5.88 GPa Fiber Strength [REF-06]", power: "0 W", yieldDraw: "0 Wh/day", cost: 3200, role: "Primary ocean buoyant float housing wave absorber anchors and sub-surface manifold attachment points." },
+{ id: 2, name: "GRP Dome Upper Enclosure", subsystem: "Structural Hull", material: "E-Glass Reinforced Plastic (GRP) / Isophthalic Resin", size: "1.2m Dia x 0.7m H | 18.5 kg", bus: "Grounding Plane", efficiency: "100% RF Transmit Efficiency", power: "0 W", yieldDraw: "0 Wh/day", cost: 1400, role: "RF-transparent weatherproof dome enclosing weather sensors, cameras, and satellite transceivers." },
+{ id: 3, name: "Grade 5 Titanium (Ti-6Al-4V) Fasteners & Hardware", subsystem: "Structural Hull", material: "Titanium Ti-6Al-4V Alloy + PTFE Isolation Bushings", size: "Hardware Pack | 6.2 kg", bus: "Isolated Bushings", efficiency: "Yield Strength 880 MPa | 100% Galvanic Immunity", power: "0 W", yieldDraw: "0 Wh/day", cost: 650, role: "Connects structural joints and submerged hardware without galvanic corrosion potential." },
+{ id: 4, name: "Sapphire Optical Viewports with Hydrophobic Nanocoating", subsystem: "Structural Hull", material: "Synthetic Sapphire Ring Glass + Silica Nanocoating", size: "4x 120mm Dia Ports | 3.8 kg", bus: "Optical Passive", efficiency: "98.8% Light Transmission | 115° Water Angle", power: "0 W", yieldDraw: "0 Wh/day", cost: 850, role: "Clear 360° optical windows shedding sea spray and salt crusted droplets automatically." },
+{ id: 5, name: "Biomimetic Silicone Sharkskin Foul-Release Coating", subsystem: "Structural Hull", material: "Fluoropolymer Silicone Matrix (Placoid Micro-Texture)", size: "8.5 m² Hull Area | 2.5 kg", bus: "Copper-Free Surface", efficiency: "99.2% Barnacle Adhesion Reduction", power: "0 W", yieldDraw: "0 Wh/day", cost: 450, role: "Non-toxic mechanical bio-fouling prevention without copper leaching into marine ecosystems." },
+{ id: 6, name: "ETFE-Laminated SunPower Maxeon Solar Deck 300W", subsystem: "Power Generation", material: "SunPower Maxeon Gen 3 Monocrystalline Cells / ETFE Film", size: "1.8 m² Deck Surface | 4.2 kg", bus: "48V DC Bus (MPPT)", efficiency: "22.1-22.6% Module Eff. [REF-01]", power: "300 W Peak [REF-01]", yieldDraw: "+1,147.5 Wh/day [REF-01]", cost: 750, role: "Impact-resistant solar deck harvesting power from direct sunlight and diffuse marine glare." },
+{ id: 7, name: "Helical VAWT 6061-T6 Al / CFRP Blades + PMSG 200W", subsystem: "Power Generation", material: "Anodized 6061-T6 Al / CFRP Blades + Permanent Magnet Gen", size: "0.8m Dia x 1.2m H | 12.5 kg", bus: "3-Phase AC -> 48V DC", efficiency: "Cp = 0.32 Aerodynamic Power Coeff.", power: "200 W Rated", yieldDraw: "+1,200.0 Wh/day", cost: 1100, role: "Omnidirectional wind energy capture with internal magnetic shaft drive into sealed dry dome." },
+{ id: 8, name: "Submerged Wave Point-Absorber Hydraulic Rams 100W", subsystem: "Power Generation", material: "316L SS Hydraulic Rams + Heavy Steel Ballast Plate", size: "1.2m Dia Plate | 150 kg", bus: "Hydraulic -> 48V Gen", efficiency: "30% Wave Mechanical Conversion", power: "100 W Rated", yieldDraw: "+1,155.3 Wh/day", cost: 1850, role: "Converts vertical ocean heave and swell movement into continuous 24/7 hydraulic power." },
+{ id: 9, name: "MOSFET Active Ideal Diode Power Distribution Bus 48V", subsystem: "Power Mgmt & Storage", material: "Ultra-low Rds(on) Power MOSFET Controller PCB", size: "200 x 150 x 50 mm | 1.1 kg", bus: "48V DC Central Bus", efficiency: ">98.5% Electrical Conversion Eff.", power: "1.5 W Loss", yieldDraw: "-36.0 Wh/day", cost: 380, role: "Active power blending from solar, wind, and wave sources with zero back-feeding risk." },
+{ id: 10, name: "EVE LiFePO4 Battery Bank 48V 100Ah (~4.896 kWh)", subsystem: "Power Mgmt & Storage", material: "EVE LF100LA Prismatic Cells in IP67 Aluminum Case", size: "520 x 260 x 220 mm | 38.0 kg", bus: "48V DC Nominal", efficiency: "15S1P 48V ~102Ah (4.896 kWh) • 5,000+ Cycles [REF-02]", power: "4,896 Wh Nominal [REF-02]", yieldDraw: "4,178 Wh Usable [REF-02]", cost: 2400, role: "High-density thermal-stable energy storage powering baseline and survival operations." },
+{ id: 11, name: "Main Flight Controller MCU & Active BMS System", subsystem: "Communications & Computing", material: "Dual ARM Cortex-M7 Industrial MCU + CAN BMS Board", size: "160 x 110 x 35 mm | 0.8 kg", bus: "12V / 5V DC Buck", efficiency: "92% Step-Down Efficiency", power: "5.0 W (Base)", yieldDraw: "-120.0 Wh/day", cost: 520, role: "Central state machine control, telemetry logging, safety load shedding, and battery monitoring." },
+{ id: 12, name: "Iridium 9603 SBD Short Burst Data Transceiver", subsystem: "Communications & Computing", material: "Iridium 9603 SBD Module + Internal Patch Antenna", size: "70 x 50 x 15 mm | 0.2 kg", bus: "5V DC Serial RS232", efficiency: "~0.8 W Avg SBD TX Power [REF-07]", power: "0.5 W Burst [REF-07]", yieldDraw: "-12.0 Wh/day [REF-07]", cost: 450, role: "Emergency SOS pings, typhoon alerts, and ultra-reliable low-bandwidth global satellite pings." },
+{ id: 13, name: "Starlink Mini Phased Array Satcom Terminal", subsystem: "Communications & Computing", material: "Electronic Phased Array Antenna + Wi-Fi Router", size: "300 x 250 x 40 mm | 1.1 kg", bus: "12V-48V DC Input", efficiency: "Up to 100 Mbps Broadband Speed [REF-03]", power: "25-40 W Avg Draw [REF-03]", yieldDraw: "-600.0 Wh/day [REF-03]", cost: 590, role: "High-speed broadband uplink for live underwater video, telemetry dumps, and remote firmware updates." },
+{ id: 14, name: "Solid-State Ultrasonic Anemometer & MEMS Barometer", subsystem: "Atmospheric Sensors", material: "Acoustic Transducer Array + High-Freq Piezoresistive MEMS", size: "150mm Air Channel | 0.8 kg", bus: "12V DC RS485", efficiency: "±0.1 m/s Wind | 0.01 hPa Baro Precision", power: "1.5 W Base", yieldDraw: "-36.0 Wh/day", cost: 780, role: "Moving-part-free wind vector tracking; detects pressure drops >1.5 hPa/hr for typhoon warnings." },
+{ id: 15, name: "Honeywell Durafet ISFET Glass-Free pH Probe", subsystem: "Sub-Surface Probes", material: "Ion-Sensitive Field-Effect Transistor Silicon Chip / PEEK Shell", size: "25mm Dia x 180mm L | 0.4 kg", bus: "12V DC Analog", efficiency: "ISFET Solid-State Tech | Zero Glass Risk [REF-04]", power: "0.6 W [REF-04]", yieldDraw: "-14.4 Wh/day [REF-04]", cost: 620, role: "Solid-state ocean acidification monitoring immune to heavy wave vibration and bulb breakage." },
+{ id: 16, name: "YSI EXO Luminescent Optical DO & Turbidity Probe", subsystem: "Sub-Surface Probes", material: "Phase-Shift Luminescence DO Cap + 90° Nephelometer LED", size: "35mm Dia x 220mm L | 0.6 kg", bus: "12V DC SDI-12", efficiency: "Zero O2 Consumption | 0-4000 FNU Range [REF-05]", power: "1.4 W [REF-05]", yieldDraw: "-33.6 Wh/day [REF-05]", cost: 890, role: "Tracks dissolved oxygen in hypoxic dead zones and monitors plankton/sediment turbidity blooms." },
+{ id: 17, name: "Piezoelectric Hydrophone Acoustic Array & DSP", subsystem: "Sub-Surface Probes", material: "PZT Ceramic Hydrophone Elements + Signal Pre-Amp Board", size: "3-Point Hull Array | 1.5 kg", bus: "12V DC Analog/DSP", efficiency: "20 Hz - 80 kHz Acoustic Detection", power: "3.0 W", yieldDraw: "-72.0 Wh/day", cost: 720, role: "Real-time acoustic detection of marine mammal vocalizations and illegal dynamite/ship engine noise." },
+{ id: 18, name: "IP68 Sony STARVIS II Camera & Edge Vision NPU", subsystem: "Sub-Surface Probes", material: "Sony STARVIS II Low-Light CMOS Sensor + ARM NPU", size: "80mm Dia Casing | 1.8 kg", bus: "12V DC / MIPI / Eth", efficiency: "STARVIS Low-Light / Edge-AI Portal [REF-08]", power: "12.0 W Active [REF-08]", yieldDraw: "-288.0 Wh/day [REF-08]", cost: 680, role: "Edge-AI marine species classification and real-time micro-plastic particle identification." },
+{ id: 19, name: "Blade-Free Venturi Air Injection Aeration Compressor", subsystem: "Bio-Remediation", material: "Brushless DC Air Compressor + Micro-Bubble Nozzles", size: "Internal Air Manifold | 4.5 kg", bus: "48V DC Motor Driver", efficiency: "88% Pneumatic Lift Eff. | Blade-Free", power: "60.0 W Active", yieldDraw: "-1,440.0 Wh/day", cost: 410, role: "Micro-bubble ocean dead-zone re-oxygenation and gentle surface plastic lifting without fauna harm." },
+{ id: 20, name: "275 nm UV-C Optical Anti-Biofouling LED Array", subsystem: "Bio-Remediation", material: "Deep UV-C LED Ring Array + Quartz Lens Optics", size: "Perimeter Lens Rings | 0.4 kg", bus: "12V DC Pulsed Driver", efficiency: "275 nm Wavelength | 10 min/hr Duty", power: "1.3 W Avg", yieldDraw: "-31.2 Wh/day", cost: 160, role: "Pulsed UV-C light sterilization preventing micro-algae biofilm formation over sub-surface camera ports." }
+];
+
+let activeSubsystemFilter = "ALL";
+let costDonutChartInstance = null;
+
+const ACTIVE_PILL = "pill-btn px-3 py-1 rounded-lg bg-cyan-600 text-slate-950 font-semibold transition";
+const IDLE_PILL = "pill-btn px-3 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 transition";
+
+function escapeHTML(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').split('"').join('&quot;');
+}
+function start() {
+  if (window.lucide) lucide.createIcons();
+  renderBOMTable();
+  updateCostAnalytics();
+}
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', start);
+} else {
+  start();
+}
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+function renderBOMTable() {
+  const tbody = document.getElementById('bom-table-body');
+  const q = document.getElementById('bom-search').value.toLowerCase();
+  tbody.innerHTML = '';
+
+  const filtered = bomComponents.filter(item => {
+    const okSub = activeSubsystemFilter === "ALL" || item.subsystem === activeSubsystemFilter;
+    const okSearch = item.name.toLowerCase().includes(q) ||
+                     item.material.toLowerCase().includes(q) ||
+                     item.subsystem.toLowerCase().includes(q);
+    return okSub && okSearch;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="py-8 text-center text-slate-500">No matching components found.</td></tr>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/40 cursor-pointer";
+    tr.onclick = (e) => { if (!e.target.closest('button')) openModal(item.id); };
+    const isYield = item.yieldDraw.startsWith('+');
+    tr.innerHTML = `
+      <td class="py-3 px-4 font-bold text-slate-200 min-w-[16rem]">${escapeHTML(item.name)}</td>
+      <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 border border-slate-800 text-cyan-400 whitespace-nowrap">${escapeHTML(item.subsystem)}</span></td>
+      <td class="py-3 px-4 text-slate-400 text-[11px] max-w-xs truncate" title="${escapeHTML(item.material)}">${escapeHTML(item.material)}</td>
+      <td class="py-3 px-4 font-mono text-[11px] text-slate-300 whitespace-nowrap">${escapeHTML(item.size)}</td>
+      <td class="py-3 px-4 font-mono text-[11px] text-slate-400 whitespace-nowrap">${escapeHTML(item.bus)}</td>
+      <td class="py-3 px-4 font-mono text-[11px] text-teal-400 whitespace-nowrap">${escapeHTML(item.efficiency)}</td>
+      <td class="py-3 px-4 font-mono font-bold text-amber-400 whitespace-nowrap">${escapeHTML(item.power)}</td>
+      <td class="py-3 px-4 font-mono font-bold whitespace-nowrap ${isYield ? 'text-emerald-400' : 'text-cyan-400'}">${escapeHTML(item.yieldDraw)}</td>
+      <td class="py-3 px-4 font-mono font-bold text-sky-300">$${item.cost.toLocaleString()}</td>
+      <td class="py-3 px-4 text-center"><button type="button" onclick="openModal(${item.id})" class="px-2 py-1 bg-slate-800 hover:bg-cyan-600 hover:text-slate-950 text-slate-300 rounded text-[11px] transition">Spec</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterSubsystem(sub) {
+  activeSubsystemFilter = sub;
+  document.querySelectorAll('.pill-btn').forEach(btn => {
+    btn.className = btn.dataset.sub === sub ? ACTIVE_PILL : IDLE_PILL;
+  });
+  renderBOMTable();
+}
+
+function filterBOMTable() { renderBOMTable(); }
+
+function openModal(id) {
+  const item = bomComponents.find(c => c.id === id);
+  if (!item) return;
+  document.getElementById('modal-title').textContent = item.name;
+  document.getElementById('modal-subsystem').textContent = item.subsystem;
+  document.getElementById('modal-bus').textContent = item.bus;
+  document.getElementById('modal-size').textContent = item.size;
+  document.getElementById('modal-efficiency').textContent = item.efficiency;
+  document.getElementById('modal-power').textContent = item.power;
+  document.getElementById('modal-yield').textContent = item.yieldDraw;
+  document.getElementById('modal-cost').textContent = '$' + item.cost.toLocaleString();
+  document.getElementById('modal-material').textContent = item.material;
+  document.getElementById('modal-role').textContent = item.role;
+  document.getElementById('component-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('component-modal').classList.remove('open');
+}
+
+function updateCostAnalytics() {
+  const mult = parseFloat(document.getElementById('spares-multiplier').value);
+  const subTotals = {};
+  bomComponents.forEach(c => { subTotals[c.subsystem] = (subTotals[c.subsystem] || 0) + c.cost * mult; });
+  const grand = Object.values(subTotals).reduce((a, b) => a + b, 0);
+  document.getElementById('grand-total-cost').textContent = '$' + grand.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const list = document.getElementById('subsystem-cost-list');
+  list.innerHTML = '';
+  const colors = {
+    'Structural Hull': 'text-teal-400', 'Power Generation': 'text-amber-400', 'Power Mgmt & Storage': 'text-cyan-400',
+    'Atmospheric Sensors': 'text-sky-400', 'Sub-Surface Probes': 'text-indigo-400', 'Communications & Computing': 'text-purple-400',
+    'Bio-Remediation': 'text-emerald-400'
+  };
+  Object.keys(subTotals).forEach(sub => {
+    const val = subTotals[sub];
+    const pct = ((val / grand) * 100).toFixed(1);
+    const div = document.createElement('div');
+    div.className = "flex flex-wrap justify-between items-center gap-x-3 p-2 rounded bg-slate-900 border border-slate-800/80";
+    div.innerHTML = `
+      <span class="text-slate-300 font-sans">${escapeHTML(sub)}</span>
+      <div class="flex gap-3">
+        <span class="text-slate-500">${pct}%</span>
+        <span class="font-bold ${colors[sub] || 'text-white'}">$${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+      </div>`;
+    list.appendChild(div);
+  });
+
+  if (!window.Chart) return;
+  const labels = Object.keys(subTotals);
+  const data = Object.values(subTotals);
+  if (costDonutChartInstance) {
+    costDonutChartInstance.data.labels = labels;
+    costDonutChartInstance.data.datasets[0].data = data;
+    costDonutChartInstance.update();
+  } else {
+    const ctx = document.getElementById('costDonutChart').getContext('2d');
+    costDonutChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: ['#10b981', '#f59e0b', '#06b6d4', '#38bdf8', '#6366f1', '#a855f7', '#34d399'],
+          borderWidth: 2,
+          borderColor: '#0f172a'
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
+    });
+  }
+}
+</script>
+
+<!-- PWA & Offline Access Script -->
+<div id="offline-toast" class="fixed bottom-4 left-4 z-50 hidden items-center gap-2.5 rounded-xl bg-slate-900/95 border border-amber-500/50 px-4 py-2.5 text-xs font-medium text-amber-300 shadow-2xl backdrop-blur-md">
+  <span class="relative flex h-2.5 w-2.5">
+    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+  </span>
+  <span>Offline Mode Active — Using cached specification data</span>
+</div>
+
+<div id="pwa-install-banner" class="fixed bottom-4 right-4 z-50 hidden items-center gap-3 rounded-xl bg-slate-900/95 border border-cyan-500/50 p-3 shadow-2xl backdrop-blur-md">
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+      <i data-lucide="download" class="w-4 h-4"></i>
+    </div>
+    <div class="text-xs">
+      <div class="font-bold text-white">Install SWWARM App</div>
+      <div class="text-slate-400 text-[10px]">Access offline anytime</div>
+    </div>
+  </div>
+  <button id="pwa-install-btn" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-lg transition-colors">Install</button>
+  <button id="pwa-close-btn" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+</div>
+
+<script>
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((reg) => console.log('[SWWARM PWA] ServiceWorker registered with scope:', reg.scope))
+      .catch((err) => console.warn('[SWWARM PWA] ServiceWorker registration failed:', err));
+  });
+}
+
+// Offline Status Indicator
+function updateOnlineStatus() {
+  const offlineToast = document.getElementById('offline-toast');
+  if (offlineToast) {
+    if (!navigator.onLine) {
+      offlineToast.classList.remove('hidden');
+      offlineToast.classList.add('flex');
+    } else {
+      offlineToast.classList.add('hidden');
+      offlineToast.classList.remove('flex');
+    }
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// PWA Install Prompt handling
+let deferredPrompt = null;
+const installBanner = document.getElementById('pwa-install-banner');
+const installBtn = document.getElementById('pwa-install-btn');
+const closeBtn = document.getElementById('pwa-close-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBanner && !window.matchMedia('(display-mode: standalone)').matches) {
+    installBanner.classList.remove('hidden');
+    installBanner.classList.add('flex');
+    if (window.lucide) lucide.createIcons();
+  }
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      if (installBanner) installBanner.classList.add('hidden');
+    }
+    deferredPrompt = null;
+  });
+}
+
+if (closeBtn) {
+  closeBtn.addEventListener('click', () => {
+    if (installBanner) installBanner.classList.add('hidden');
+  });
+}
+</script>
+
+</body></html>

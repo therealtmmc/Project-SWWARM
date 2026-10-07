@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build": "echo 'No build step required'",
+    "build": "mkdir -p public && cp -r index.html sw.js manifest.json icon.svg *.png \"Project SWWARM Master Portal.html\" public/ 2>/dev/null || true",
     "lint": "echo 'No lint errors'"
   },
   "dependencies": {

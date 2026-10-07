@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#070d19"/>
+  <g transform="translate(0, 0)">
+    <!-- Outer wave radar ring -->
+    <circle cx="256" cy="230" r="170" fill="none" stroke="#06b6d4" stroke-width="12" opacity="0.25"/>
+    <circle cx="256" cy="230" r="120" fill="none" stroke="#06b6d4" stroke-width="16" opacity="0.6"/>
+    <!-- Vessel Hull / Hydrofoil motif -->
+    <path d="M120 290 L256 120 L392 290 L340 310 L256 250 L172 310 Z" fill="#06b6d4"/>
+    <!-- Ocean Wave Motif -->
+    <path d="M90 370 Q170 330 256 370 T422 370" fill="none" stroke="#38bdf8" stroke-width="20" stroke-linecap="round"/>
+    <path d="M130 420 Q200 390 256 420 T382 420" fill="none" stroke="#0284c7" stroke-width="16" stroke-linecap="round"/>
+  </g>
+</svg>
